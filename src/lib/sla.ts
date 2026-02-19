@@ -1,17 +1,12 @@
-// src/lib/sla.ts
-import { Ticket } from "@/generated/prisma/client";
+import { Ticket } from "@prisma/client";
 
-export function isSlaBreached(ticket: Ticket): boolean {
-  const createdAt = new Date(ticket.createdAt).getTime();
-  const now = Date.now();
-
-  const slaMs = ticket.slaHours * 60 * 60 * 1000;
-  return now > createdAt + slaMs && ticket.status !== "CLOSED";
-}
-
-/**
- * Returns SLA status string for UI
- */
-export function getSlaStatus(ticket: Ticket): "OK" | "BREACHED" {
-  return isSlaBreached(ticket) ? "BREACHED" : "OK";
+export default function slaCheck(ticket: Ticket): boolean {
+  const creationTime = ticket.createdAt;
+  const now = new Date();
+  
+  const durationInHours = (now.getTime() - creationTime.getTime()) / (1000 * 60 * 60);
+  
+  const limit = ticket.slaHours;
+  
+  return durationInHours <= limit;
 }
