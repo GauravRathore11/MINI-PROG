@@ -6,12 +6,14 @@ pipeline{
     stages{
         stage('Build'){
             steps{
-                if (isUnix()) {
-                    sh 'npm ci'
-                    sh 'npm run build'
-                } else {
-                    bat 'npm ci'
-                    bat 'npm run build'
+                script {
+                    if (isUnix()) {
+                        sh 'npm ci'
+                        sh 'npm run build'
+                    } else {
+                        bat 'npm ci'
+                        bat 'npm run build'
+                    }
                 }
             }
         }
