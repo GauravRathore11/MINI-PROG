@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-import { NextResponse } from 'next/server'
-export async function GET() {
-  return NextResponse.json({ status: 'ok' })
-}
-
-
-
-
-
-
-
-
-
-=======
 ﻿import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
@@ -148,4 +133,3 @@ export async function GET() {
     await prisma.$disconnect();
   }
 }
->>>>>>> 8a48d8c5dcba3cd0a45517314db77a09aca7963c
