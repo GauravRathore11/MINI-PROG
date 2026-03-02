@@ -8,7 +8,6 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-<<<<<<< HEAD
 
 
 
@@ -16,9 +15,6 @@ datasource db {
 // Each model and field is commented with its purpose and relations.
 // All team members must use this schema as the contract for data shape.
 
-=======
- 
->>>>>>> 8a48d8c5dcba3cd0a45517314db77a09aca7963c
 // ------------------------------------
 // ENUMS
 // ------------------------------------
