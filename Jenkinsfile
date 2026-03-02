@@ -10,11 +10,11 @@ pipeline{
                 script {
                     if (isUnix()) {
                         withCredentials([string(credentialsId: 'DATABASE_URL', variable: 'DATABASE_URL')]) {
-                            sh 'docker build --build-arg DATABASE_URL="${DATABASE_URL}" -t ganuthebabu/MINI_PROG:latest .'
+                            sh 'docker build --build-arg DATABASE_URL="${DATABASE_URL}" -t ganuthebabu/mini_prog:latest .'
                         }
                     }else {
                         withCredentials([string(credentialsId: 'DATABASE_URL', variable: 'DATABASE_URL')]) {
-                            sh 'docker build --build-arg DATABASE_URL="${DATABASE_URL}" -t ganuthebabu/MINI_PROG:latest .'
+                            sh 'docker build --build-arg DATABASE_URL="${DATABASE_URL}" -t ganuthebabu/mini_prog:latest .'
                         }
                     }
                 }
