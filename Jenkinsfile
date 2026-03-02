@@ -5,9 +5,7 @@ pipeline{
     }
     stages{
         stage('Build Docker app'){
-            when {
-                branch 'origin/main'
-            }
+            
             steps{
                 script {
                     if (isUnix()) {
@@ -23,9 +21,7 @@ pipeline{
             }
         }
         stage('Push'){
-            when {
-                branch 'origin/main'
-            }
+            
             steps{
                 script {
                     withCredentials([usernamePassword(credentialsId: 'DOCKER_CREDS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
