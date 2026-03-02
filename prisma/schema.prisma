@@ -1,13 +1,24 @@
 // Prisma Client Generator
 generator client {
   provider = "prisma-client-js"
+  engineType = "binary"
 }
  
 // Database Connection (url is in prisma.config.ts for Prisma 7)
 datasource db {
   provider = "postgresql"
 }
+<<<<<<< HEAD
+
+
+
+// This is the central Prisma schema for the entire modular ITSM system.
+// Each model and field is commented with its purpose and relations.
+// All team members must use this schema as the contract for data shape.
+
+=======
  
+>>>>>>> 8a48d8c5dcba3cd0a45517314db77a09aca7963c
 // ------------------------------------
 // ENUMS
 // ------------------------------------
