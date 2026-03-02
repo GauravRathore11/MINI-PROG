@@ -6,7 +6,7 @@ pipeline{
     stages{
         stage('Build Docker app'){
             when {
-                branch 'main'
+                branch 'origin/main'
             }
             steps{
                 script {
@@ -24,7 +24,7 @@ pipeline{
         }
         stage('Push'){
             when {
-                branch 'main'
+                branch 'origin/main'
             }
             steps{
                 script {
