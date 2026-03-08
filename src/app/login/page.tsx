@@ -30,41 +30,47 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-96">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Welcome Back 👋
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 px-4">
+    
+    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md">
+      
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+        Welcome Back 👋
+      </h2>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+      <form onSubmit={handleLogin} className="space-y-4">
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition duration-300"
-          >
-            Login
-          </button>
-        </form>
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-        <p className="text-center text-gray-500 mt-4 text-sm">
-          Admin: admin@test.com | 123456
-        </p>
-      </div>
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition duration-300"
+        >
+          Login
+        </button>
+
+      </form>
+
+      <p className="text-center text-gray-500 mt-4 text-sm">
+        Admin: admin@test.com | 123456
+      </p>
+
     </div>
+
+  </div>
   );
 }
