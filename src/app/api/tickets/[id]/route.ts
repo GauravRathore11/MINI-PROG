@@ -16,7 +16,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = getCurrentUser();
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const { id } = await params;
@@ -25,19 +25,19 @@ export async function GET(
         const ticket = await prisma.ticket.findUnique({
             where: { id: ticketId },
             include: {
-                createdBy: { select: { id: true, name: true, email: true, department: true } },
+                createdBy: { select: { id: true, name: true, email: true } },
                 assignedTo: { select: { id: true, name: true, email: true } },
                 comments: {
-                    include: { author: { select: { id: true, name: true, role: true } } },
+                    include: { user: { select: { id: true, name: true, role: true } } },
                     orderBy: { createdAt: "asc" },
-                    where: user.role === "EMPLOYEE" ? { isInternal: false } : {},
+                    where: user.roleId === 1 ? { isInternal: false } : {},
                 },
             },
         });
 
         if (!ticket) return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
 
-        if (user.role === "EMPLOYEE" && ticket.createdById !== parseInt(user.userId, 10)) {
+        if (user.roleId === 1 && ticket.createdById !== parseInt(user.userId, 10)) {
             return NextResponse.json({ error: "Forbidden." }, { status: 403 });
         }
 
@@ -54,9 +54,9 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = getCurrentUser();
+        const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        if (user.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+        if (user.roleId === 1) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
 
         const { id } = await params;
         const ticketId = parseInt(id, 10);
@@ -119,7 +119,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = getCurrentUser();
+        const user = await getCurrentUser();
         if (!user || user.role !== "ADMIN") {
             return NextResponse.json({ error: "Forbidden." }, { status: 403 });
         }
