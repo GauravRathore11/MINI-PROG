@@ -34,11 +34,14 @@ export default function LoginPage() {
 
       localStorage.setItem("token", data.token);
 
-      // Force a hard redirect to ensure cookie is processed
-      if (data.role === 1) {
-        router.push("/dashboard");
+      // Redirect based on role
+      // Role IDs: 1=USER, 4=ADMIN, 5=AGENT, 6=MANAGER
+      if (data.role === 4 || data.role === 6) {
+        // ADMIN or MANAGER → dashboard
+        window.location.href = "/dashboard";
       } else {
-        router.push("/tickets");
+        // USER or AGENT → tickets
+        window.location.href = "/tickets";
       }
     } catch (err) {
       setError("Login failed. Please try again.");
