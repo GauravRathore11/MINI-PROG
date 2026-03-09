@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get("token")?.value;
 
   console.log("Middleware running for:", request.nextUrl.pathname);
   console.log("Token found:", !!token);
@@ -9,7 +11,7 @@ import type { NextRequest } from "next/server";
     console.log("No token - redirecting to login");
     return NextResponse.redirect(new URL("/login", request.url));
   }
- 
+
   try {
     // Simple base64 decode check instead of full JWT verify in middleware
     // This is because JWT verification can fail in Edge runtime
@@ -36,10 +38,8 @@ import type { NextRequest } from "next/server";
     console.error("Token verification failed:", err);
     return NextResponse.redirect(new URL("/login", request.url));
   }
- 
-  return NextResponse.next()
 }
- 
+
 export const config = {
   matcher: ["/dashboard/:path*"],
 };
