@@ -11,12 +11,13 @@ import { createNotifications } from "@/lib/notifications";
 
 export async function GET(
     _request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const user = getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const ticketId = parseInt(params.id, 10);
+    const { id } = await params;
+    const ticketId = parseInt(id, 10);
 
     const comments = await prisma.ticketComment.findMany({
         where: {
@@ -50,13 +51,14 @@ export async function GET(
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = getCurrentUser();
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-        const ticketId = parseInt(params.id, 10);
+        const { id } = await params;
+        const ticketId = parseInt(id, 10);
         const { content, isInternal } = await request.json();
         
         if (!content?.trim()) {
