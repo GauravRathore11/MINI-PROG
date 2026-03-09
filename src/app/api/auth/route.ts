@@ -1,5 +1,4 @@
 ﻿import { NextResponse } from "next/server";
-<<<<<<< Updated upstream
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
@@ -63,48 +62,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-=======
-import { PrismaClient } from "@prisma/client";
-import { comparePassword, generateToken } from "@auu";
-
-const prisma = new PrismaClient();
-
-export async function POST(req: Request) {
-  const { email, password } = await req.json();
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: { role: true },
-  });
-
-  if (!user) {
-    return NextResponse.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
-    );
-  }
-
-  const isValid = await comparePassword(password, user.password);
-
-  if (!isValid) {
-    return NextResponse.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
-    );
-  }
-
-  const token = generateToken(user);
-
-  const response = NextResponse.json({
-    message: "Login successful",
-    role: user.role.name,
-  });
-
-  response.cookies.set("token", token, {
-    httpOnly: true,
-    path: "/",
-  });
-
-  return response;
->>>>>>> Stashed changes
 }
