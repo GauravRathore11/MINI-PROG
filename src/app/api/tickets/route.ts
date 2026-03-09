@@ -10,8 +10,15 @@ import { getCurrentUser } from "@/lib/auth";
 import { calculateSLADeadline } from "@/lib/sla";
 import { createNotification } from "@/lib/notifications";
 
-// ─── GET: List tickets ────────────────────────────────────────────────────────
+// SLA hours mapping
+const SLA_HOURS: Record<string, number> = {
+    CRITICAL: 4,
+    HIGH: 8,
+    MEDIUM: 24,
+    LOW: 72,
+};
 
+// GET: List tickets
 export async function GET(request: NextRequest) {
     try {
         const user = getCurrentUser();
@@ -21,16 +28,16 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get("status") as string | undefined;
         const priority = searchParams.get("priority") as string | undefined;
         const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
-        const limit = 20; // tickets per page
+        const limit = 20;
 
-        // ── Role-based filtering ──────────────────────────────────────────────
-        // Employees only see their own tickets; Agents see assigned; Admins see all
+        const userIdInt = parseInt(user.userId, 10);
+        
         const roleFilter =
             user.role === "EMPLOYEE"
-                ? { createdById: user.userId }
+                ? { createdById: userIdInt }
                 : user.role === "AGENT"
-                    ? { assignedToId: user.userId }
-                    : {}; // ADMIN sees all
+                    ? { assignedToId: userIdInt }
+                    : {};
 
         const where = {
             ...roleFilter,
@@ -42,8 +49,8 @@ export async function GET(request: NextRequest) {
             prisma.ticket.findMany({
                 where,
                 include: {
-                    createdBy: { select: { id: true, name: true, email: true } },
-                    assignedTo: { select: { id: true, name: true, email: true } },
+                    createdBy: { select: { id: true, name: true } },
+                    assignedTo: { select: { id: true, name: true } },
                     _count: { select: { comments: true } },
                 },
                 orderBy: { createdAt: "desc" },
@@ -60,8 +67,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// ─── POST: Create ticket ──────────────────────────────────────────────────────
-
+// POST: Create ticket
 export async function POST(request: NextRequest) {
     try {
         const user = getCurrentUser();
@@ -73,8 +79,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "All fields are required." }, { status: 400 });
         }
 
-        // Calculate SLA deadline based on priority
         const slaDeadline = calculateSLADeadline(priority);
+        const slaHours = SLA_HOURS[priority] ?? 24;
 
         const ticket = await prisma.ticket.create({
             data: {
@@ -83,14 +89,14 @@ export async function POST(request: NextRequest) {
                 priority,
                 category,
                 slaDeadline,
-                createdById: user.userId,
+                slaHours,
+                createdById: parseInt(user.userId, 10),
             },
         });
 
-        // Notify all admins about the new ticket
-        const admins = await prisma.user.findMany({ where: { role: "ADMIN" } });
+        const admins = await prisma.user.findMany({ where: { role: { name: "ADMIN" } } });
         await Promise.all(
-            admins.map((admin) =>
+            admins.map((admin: any) =>
                 createNotification({
                     userId: admin.id,
                     message: `New ticket: "${title}" was submitted by ${user.name}.`,
@@ -105,3 +111,4 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Server error." }, { status: 500 });
     }
 }
+

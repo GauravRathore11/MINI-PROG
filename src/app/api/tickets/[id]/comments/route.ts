@@ -16,17 +16,36 @@ export async function GET(
     const user = getCurrentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const comments = await prisma.comment.findMany({
+    const ticketId = parseInt(params.id, 10);
+
+    const comments = await prisma.ticketComment.findMany({
         where: {
-            ticketId: params.id,
-            // Employees cannot see internal comments
+            ticketId: ticketId,
             isInternal: user.role === "EMPLOYEE" ? false : undefined,
         },
-        include: { author: { select: { id: true, name: true, role: true } } },
+        include: { 
+            user: { select: { id: true, name: true, role: true } },
+            ticket: { select: { title: true } }
+        },
         orderBy: { createdAt: "asc" },
     });
 
-    return NextResponse.json({ comments });
+    const mappedComments = comments.map((c: any) => ({
+        id: c.id,
+        content: c.content || c.message || "",
+        message: c.message,
+        ticketId: c.ticketId,
+        authorId: c.userId,
+        isInternal: c.isInternal,
+        createdAt: c.createdAt,
+        author: {
+            id: c.user.id,
+            name: c.user.name,
+            role: c.user.role.name as "EMPLOYEE" | "AGENT" | "ADMIN",
+        },
+    }));
+
+    return NextResponse.json({ comments: mappedComments });
 }
 
 export async function POST(
@@ -37,30 +56,34 @@ export async function POST(
         const user = getCurrentUser();
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+        const ticketId = parseInt(params.id, 10);
         const { content, isInternal } = await request.json();
+        
         if (!content?.trim()) {
             return NextResponse.json({ error: "Comment content is required." }, { status: 400 });
         }
 
-        // Only agents/admins can post internal comments
         const internal = (user.role !== "EMPLOYEE") && !!isInternal;
 
-        const ticket = await prisma.ticket.findUnique({ where: { id: params.id } });
+        const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
         if (!ticket) return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
 
-        const comment = await prisma.comment.create({
+        const comment = await prisma.ticketComment.create({
             data: {
                 content,
+                message: content,
                 isInternal: internal,
-                ticketId: params.id,
-                authorId: user.userId,
+                ticketId: ticketId,
+                userId: parseInt(user.userId, 10),
             },
-            include: { author: { select: { id: true, name: true, role: true } } },
+            include: { 
+                user: { select: { id: true, name: true, role: true } }
+            },
         });
 
-        // Notify ticket creator and assignee (except the commenter)
         const notifyIds = [ticket.createdById, ticket.assignedToId]
-            .filter((id): id is string => !!id && id !== user.userId);
+            .filter((id): id is number => !!id && id !== parseInt(user.userId, 10))
+            .map(id => id.toString());
 
         if (notifyIds.length > 0) {
             await createNotifications(notifyIds, {
@@ -69,9 +92,25 @@ export async function POST(
             });
         }
 
-        return NextResponse.json({ comment }, { status: 201 });
+        const responseComment = {
+            id: comment.id,
+            content: comment.content || comment.message || "",
+            message: comment.message,
+            ticketId: comment.ticketId,
+            authorId: comment.userId,
+            isInternal: comment.isInternal,
+            createdAt: comment.createdAt,
+            author: {
+                id: comment.user.id,
+                name: comment.user.name,
+                role: comment.user.role.name as "EMPLOYEE" | "AGENT" | "ADMIN",
+            },
+        };
+
+        return NextResponse.json({ comment: responseComment }, { status: 201 });
     } catch (error) {
         console.error("[POST /api/tickets/[id]/comments]", error);
         return NextResponse.json({ error: "Server error." }, { status: 500 });
     }
 }
+

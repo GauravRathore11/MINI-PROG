@@ -4,11 +4,11 @@
  * Form to create a new support ticket.
  */
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TICKET_CATEGORIES } from "@/lib/constants";
-import type { Priority } from "@/types";
+import type { Priority } from "@/types/dashboard";
 
 const PRIORITIES: Priority[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
@@ -32,9 +32,9 @@ export default function CreateTicketPage() {
     const [loading, setLoading] = useState(false);
 
     function handleChange(
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        setForm((prev: any) => ({ ...prev, [e.target.name]: e.target.value }));
     }
 
     async function handleSubmit(e: FormEvent) {
@@ -60,7 +60,6 @@ export default function CreateTicketPage() {
                 return;
             }
 
-            // Go to the newly created ticket
             router.push(`/tickets/${data.ticket.id}`);
         } catch {
             setError("Network error. Please try again.");
@@ -71,7 +70,6 @@ export default function CreateTicketPage() {
 
     return (
         <div className="max-w-2xl">
-            {/* Header */}
             <div className="page-header">
                 <div>
                     <h1 className="page-title">New Ticket</h1>
@@ -87,7 +85,6 @@ export default function CreateTicketPage() {
                     </div>
                 )}
 
-                {/* Title */}
                 <div>
                     <label className="label" htmlFor="title">Issue title <span className="text-red-500">*</span></label>
                     <input
@@ -97,7 +94,6 @@ export default function CreateTicketPage() {
                     />
                 </div>
 
-                {/* Category */}
                 <div>
                     <label className="label" htmlFor="category">Category <span className="text-red-500">*</span></label>
                     <select id="category" name="category" className="input"
@@ -109,7 +105,6 @@ export default function CreateTicketPage() {
                     </select>
                 </div>
 
-                {/* Priority */}
                 <div>
                     <label className="label">Priority <span className="text-red-500">*</span></label>
                     <div className="grid grid-cols-2 gap-2">
@@ -136,7 +131,6 @@ export default function CreateTicketPage() {
                     </div>
                 </div>
 
-                {/* Description */}
                 <div>
                     <label className="label" htmlFor="description">
                         Description <span className="text-red-500">*</span>
@@ -148,7 +142,6 @@ export default function CreateTicketPage() {
                     />
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 pt-2">
                     <button type="submit" className="btn-primary" disabled={loading}>
                         {loading ? "Submitting…" : "Submit Ticket"}
@@ -159,3 +152,4 @@ export default function CreateTicketPage() {
         </div>
     );
 }
+

@@ -8,9 +8,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { getSLAStatus, formatSLATimeLeft } from "@/lib/sla";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import type { TicketStatus, Priority } from "@/types";
+import type { TicketStatus, Priority } from "@/types/dashboard";
 
-// Status badge color mapping
 const STATUS_COLORS: Record<TicketStatus, string> = {
     OPEN: "bg-blue-100 text-blue-700",
     IN_PROGRESS: "bg-yellow-100 text-yellow-700",
@@ -25,26 +24,12 @@ const PRIORITY_COLORS: Record<Priority, string> = {
     LOW: "bg-slate-100 text-slate-500",
 };
 
-const SLA_COLORS = {
+const SLA_COLORS: Record<string, string> = {
     on_track: "text-green-600",
     at_risk: "text-orange-500",
     breached: "text-red-600",
     resolved: "text-slate-400",
 };
-
-async function getTickets(userId: string, role: string, status?: string) {
-    const params = new URLSearchParams();
-    if (status) params.set("status", status);
-
-    const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/tickets?${params}`, {
-        cache: "no-store",
-        headers: { Cookie: `jdesk_auth=${userId}` }, // passed via server component
-    });
-
-    if (!res.ok) return { tickets: [], total: 0 };
-    return res.json();
-}
 
 export default async function TicketsPage({
     searchParams,
@@ -54,14 +39,15 @@ export default async function TicketsPage({
     const user = getCurrentUser();
     if (!user) redirect("/login");
 
-    // Fetch tickets directly from Prisma (server component — more efficient)
     const { prisma } = await import("@/lib/prisma");
 
+    const userIdInt = parseInt(user.userId, 10);
+    
     const roleFilter =
         user.role === "EMPLOYEE"
-            ? { createdById: user.userId }
+            ? { createdById: userIdInt }
             : user.role === "AGENT"
-                ? { assignedToId: user.userId }
+                ? { assignedToId: userIdInt }
                 : {};
 
     const tickets = await prisma.ticket.findMany({
@@ -82,13 +68,11 @@ export default async function TicketsPage({
 
     return (
         <div>
-            {/* Page header */}
             <div className="page-header">
                 <div>
                     <h1 className="page-title">Tickets</h1>
                     <p className="text-sm text-slate-500 mt-0.5">{tickets.length} ticket{tickets.length !== 1 ? "s" : ""}</p>
                 </div>
-                {/* Employees and Admins can create tickets */}
                 {user.role !== "AGENT" && (
                     <Link href="/tickets/create" className="btn-primary">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +83,6 @@ export default async function TicketsPage({
                 )}
             </div>
 
-            {/* Status filter tabs */}
             <div className="flex gap-1 mb-4 bg-white rounded-lg border border-slate-200 p-1 w-fit">
                 <Link
                     href="/tickets"
@@ -120,7 +103,6 @@ export default async function TicketsPage({
                 ))}
             </div>
 
-            {/* Ticket table */}
             {tickets.length === 0 ? (
                 <div className="card p-12 text-center">
                     <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -189,3 +171,4 @@ export default async function TicketsPage({
         </div>
     );
 }
+

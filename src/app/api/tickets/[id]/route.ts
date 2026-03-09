@@ -10,8 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { createNotifications } from "@/lib/notifications";
 
-// ─── GET ──────────────────────────────────────────────────────────────────────
-
+// GET
 export async function GET(
     _request: NextRequest,
     { params }: { params: { id: string } }
@@ -20,15 +19,16 @@ export async function GET(
         const user = getCurrentUser();
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+        const ticketId = parseInt(params.id, 10);
+        
         const ticket = await prisma.ticket.findUnique({
-            where: { id: params.id },
+            where: { id: ticketId },
             include: {
                 createdBy: { select: { id: true, name: true, email: true, department: true } },
                 assignedTo: { select: { id: true, name: true, email: true } },
                 comments: {
                     include: { author: { select: { id: true, name: true, role: true } } },
                     orderBy: { createdAt: "asc" },
-                    // Employees cannot see internal (agent-only) comments
                     where: user.role === "EMPLOYEE" ? { isInternal: false } : {},
                 },
             },
@@ -36,8 +36,7 @@ export async function GET(
 
         if (!ticket) return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
 
-        // Employees can only view their own tickets
-        if (user.role === "EMPLOYEE" && ticket.createdById !== user.userId) {
+        if (user.role === "EMPLOYEE" && ticket.createdById !== parseInt(user.userId, 10)) {
             return NextResponse.json({ error: "Forbidden." }, { status: 403 });
         }
 
@@ -48,8 +47,7 @@ export async function GET(
     }
 }
 
-// ─── PATCH ────────────────────────────────────────────────────────────────────
-
+// PATCH
 export async function PATCH(
     request: NextRequest,
     { params }: { params: { id: string } }
@@ -59,38 +57,35 @@ export async function PATCH(
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         if (user.role === "EMPLOYEE") return NextResponse.json({ error: "Forbidden." }, { status: 403 });
 
+        const ticketId = parseInt(params.id, 10);
         const body = await request.json();
         const { status, priority, assignedToId } = body;
 
-        const existing = await prisma.ticket.findUnique({ where: { id: params.id } });
+        const existing = await prisma.ticket.findUnique({ where: { id: ticketId } });
         if (!existing) return NextResponse.json({ error: "Ticket not found." }, { status: 404 });
 
-        // If resolving, set resolvedAt timestamp
         const resolvedAt =
             status === "RESOLVED" && existing.status !== "RESOLVED"
                 ? new Date()
                 : existing.resolvedAt;
 
         const ticket = await prisma.ticket.update({
-            where: { id: params.id },
+            where: { id: ticketId },
             data: {
                 ...(status ? { status } : {}),
                 ...(priority ? { priority } : {}),
-                ...(assignedToId !== undefined ? { assignedToId } : {}),
+                ...(assignedToId !== undefined ? { assignedToId: assignedToId ? parseInt(assignedToId, 10) : null } : {}),
                 resolvedAt,
             },
         });
 
-        // ── Notifications ──────────────────────────────────────────────────────
         const notifyUserIds: string[] = [];
 
-        // Notify ticket creator about status changes
         if (status && status !== existing.status) {
-            notifyUserIds.push(existing.createdById);
+            notifyUserIds.push(existing.createdById.toString());
         }
 
-        // Notify newly assigned agent
-        if (assignedToId && assignedToId !== existing.assignedToId) {
+        if (assignedToId && assignedToId !== existing.assignedToId?.toString()) {
             notifyUserIds.push(assignedToId);
         }
 
@@ -116,8 +111,7 @@ export async function PATCH(
     }
 }
 
-// ─── DELETE ───────────────────────────────────────────────────────────────────
-
+// DELETE
 export async function DELETE(
     _request: NextRequest,
     { params }: { params: { id: string } }
@@ -128,10 +122,12 @@ export async function DELETE(
             return NextResponse.json({ error: "Forbidden." }, { status: 403 });
         }
 
-        await prisma.ticket.delete({ where: { id: params.id } });
+        const ticketId = parseInt(params.id, 10);
+        await prisma.ticket.delete({ where: { id: ticketId } });
         return NextResponse.json({ message: "Ticket deleted." });
     } catch (error) {
         console.error("[DELETE /api/tickets/[id]]", error);
         return NextResponse.json({ error: "Server error." }, { status: 500 });
     }
 }
+

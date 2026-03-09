@@ -8,11 +8,8 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import type { TicketDetail } from "@/types";
-import type { TicketStatus, Priority, Role } from "@/types";
+import type { TicketDetail, TicketStatus, Priority, Role } from "@/types/dashboard";
 import { getSLAStatus, formatSLATimeLeft } from "@/lib/sla";
-
-// ── Colour maps ───────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<TicketStatus, string> = {
     OPEN: "bg-blue-100 text-blue-700",
@@ -33,13 +30,10 @@ const SLA_BG: Record<string, string> = {
     resolved: "bg-slate-50 border-slate-200 text-slate-500",
 };
 
-// ── Page component ────────────────────────────────────────────────────────────
-
 export default function TicketDetailPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
 
-    // Client-side user — read from a /api/me endpoint pattern or session context
     const [userRole, setUserRole] = useState<Role>("EMPLOYEE");
     const [userId, setUserId] = useState("");
 
@@ -51,7 +45,6 @@ export default function TicketDetailPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
-    // Fetch current user role
     useEffect(() => {
         fetch("/api/me").then((r) => r.json()).then((d: { role: Role; userId: string }) => {
             setUserRole(d.role);
@@ -59,7 +52,6 @@ export default function TicketDetailPage() {
         }).catch(() => { });
     }, []);
 
-    // Fetch ticket data
     useEffect(() => {
         fetch(`/api/tickets/${id}`)
             .then((r) => r.json())
@@ -67,7 +59,6 @@ export default function TicketDetailPage() {
             .catch(() => setLoading(false));
     }, [id]);
 
-    // Fetch agents list (for admin/agent assignment)
     useEffect(() => {
         if (userRole !== "EMPLOYEE") {
             fetch("/api/admin/users?role=AGENT")
@@ -75,8 +66,6 @@ export default function TicketDetailPage() {
                 .then((d: { users?: { id: string; name: string }[] }) => setAgents(d.users ?? []));
         }
     }, [userRole]);
-
-    // ── Update ticket (status, assignee) ─────────────────────────────────────
 
     async function updateTicket(data: Partial<{ status: string; assignedToId: string | null }>) {
         setSaving(true);
@@ -93,8 +82,6 @@ export default function TicketDetailPage() {
         }
     }
 
-    // ── Post comment ──────────────────────────────────────────────────────────
-
     async function handleComment(e: FormEvent) {
         e.preventDefault();
         setError("");
@@ -108,7 +95,7 @@ export default function TicketDetailPage() {
 
         if (res.ok) {
             const data = await res.json();
-            setTicket((prev) => prev
+            setTicket((prev: any) => prev
                 ? { ...prev, comments: [...prev.comments, data.comment] }
                 : prev
             );
@@ -143,7 +130,6 @@ export default function TicketDetailPage() {
 
     return (
         <div className="max-w-4xl">
-            {/* Back link */}
             <Link href="/tickets" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 mb-4 transition">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -152,9 +138,7 @@ export default function TicketDetailPage() {
             </Link>
 
             <div className="grid grid-cols-3 gap-6">
-                {/* ── Left: Ticket details + comments ── */}
                 <div className="col-span-2 space-y-4">
-                    {/* Header */}
                     <div className="card p-6">
                         <div className="flex items-start gap-3 mb-4">
                             <div className="flex-1">
@@ -177,7 +161,6 @@ export default function TicketDetailPage() {
                         </div>
                     </div>
 
-                    {/* Comments */}
                     <div className="card p-6">
                         <h2 className="font-medium text-slate-800 mb-4">
                             Comments ({ticket.comments.length})
@@ -187,7 +170,7 @@ export default function TicketDetailPage() {
                             <p className="text-slate-400 text-sm italic">No comments yet.</p>
                         ) : (
                             <div className="space-y-4 mb-6">
-                                {ticket.comments.map((c) => (
+                                {ticket.comments.map((c: any) => (
                                     <div
                                         key={c.id}
                                         className={`flex gap-3 ${c.isInternal ? "opacity-75" : ""}`}
@@ -215,7 +198,6 @@ export default function TicketDetailPage() {
                             </div>
                         )}
 
-                        {/* Add comment form */}
                         <form onSubmit={handleComment} className="space-y-3">
                             {error && <p className="text-red-600 text-sm">{error}</p>}
                             <textarea
@@ -225,7 +207,6 @@ export default function TicketDetailPage() {
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                             />
-                            {/* Internal note toggle — agents/admins only */}
                             {isStaff && (
                                 <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
                                     <input
@@ -244,9 +225,7 @@ export default function TicketDetailPage() {
                     </div>
                 </div>
 
-                {/* ── Right: Sidebar controls ── */}
                 <div className="space-y-4">
-                    {/* SLA card */}
                     <div className={`card p-4 border ${SLA_BG[slaStatus]}`}>
                         <p className="text-xs font-medium uppercase tracking-wide mb-1">SLA Status</p>
                         <p className="text-lg font-bold">{slaTime}</p>
@@ -255,7 +234,6 @@ export default function TicketDetailPage() {
                         </p>
                     </div>
 
-                    {/* Status control — staff only */}
                     {isStaff && (
                         <div className="card p-4">
                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Status</p>
@@ -282,7 +260,6 @@ export default function TicketDetailPage() {
                         </div>
                     )}
 
-                    {/* Assignee — staff only */}
                     {isStaff && (
                         <div className="card p-4">
                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Assigned To</p>
@@ -300,7 +277,6 @@ export default function TicketDetailPage() {
                         </div>
                     )}
 
-                    {/* Meta info */}
                     <div className="card p-4 space-y-2">
                         <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Details</p>
                         <div className="text-sm space-y-1">
@@ -329,3 +305,4 @@ export default function TicketDetailPage() {
         </div>
     );
 }
+
