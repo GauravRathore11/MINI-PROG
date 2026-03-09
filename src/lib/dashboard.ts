@@ -170,6 +170,7 @@ export async function getRecentApprovals(limit = 6) {
     status: mapRequestStatus(r.status),
     type: "Asset Request",
     createdAt: r.createdAt,
+    dueDate: new Date(r.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days from created
   }));
 }
 

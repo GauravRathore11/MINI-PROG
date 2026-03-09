@@ -1,8 +1,8 @@
 // ─── Dashboard Types ────────────────────────────────────────────────────────
 
-export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
-export type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
-export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type TicketStatus = "open" | "in_progress" | "resolved" | "closed";
+export type Priority = "low" | "medium" | "high" | "critical";
+export type TicketPriority = "low" | "medium" | "high" | "critical";
 export type ApprovalStatus = "pending" | "approved" | "rejected" | "escalated";
 
 export interface Ticket {
@@ -15,7 +15,7 @@ export interface Ticket {
   reporter: string;
   createdAt: Date;
   updatedAt: Date;
-  tags: string[];
+  tags?: string[];
 }
 
 export interface Approval {
@@ -26,7 +26,7 @@ export interface Approval {
   status: ApprovalStatus;
   type: string;
   createdAt: Date;
-  dueDate: Date;
+  dueDate?: Date;
   notes?: string;
 }
 
