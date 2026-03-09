@@ -16,7 +16,7 @@ export interface Ticket {
   reporter: string;
   createdAt: Date;
   updatedAt: Date;
-  tags: string[];
+  tags?: string[];
 }
 
 export interface TicketDetail {
@@ -71,7 +71,7 @@ export interface Approval {
   status: ApprovalStatus;
   type: string;
   createdAt: Date;
-  dueDate: Date;
+  dueDate?: Date;
   notes?: string;
 }
 
