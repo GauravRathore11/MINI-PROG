@@ -1,16 +1,11 @@
-﻿import '@/styles/globals.css'
-import Navbar from '@/components/Navbar'
-import Sidebar from '@/components/Sidebar'
+﻿// src/app/layout.tsx
+import "./globals.css";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html>
       <body>
-        <Navbar />
-        <div style={{ display: 'flex' }}>
-          <Sidebar />
-          <main style={{ padding: 20 }}>{children}</main>
-        </div>
+        {children}
       </body>
     </html>
   )
