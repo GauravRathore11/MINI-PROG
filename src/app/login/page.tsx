@@ -30,14 +30,14 @@ export default function LoginPage() {
       }
  
       const data = await res.json();
- 
+      console.log("Login response:", data);
       // store JWT token
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
  
       // role-based redirect
-      if (data.role === "ADMIN") {
+      if (data.user?.role === "1") {
         router.push("/dashboard");
       } else {
         router.push("/tickets");

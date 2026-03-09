@@ -14,7 +14,7 @@ export async function POST(req: Request) {
  
     // find user in database
     const result = await pool.query(
-      'SELECT * FROM "User" WHERE "email"=$1',
+      'SELECT * FROM "User" WHERE email =$1',
       [email]
     )
  
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const token = jwt.sign(
       {
         id: user.id,
-        role: user.role
+        role: user.roleid
       },
       process.env.JWT_SECRET!,
       { expiresIn: "1d" }
@@ -48,15 +48,15 @@ export async function POST(req: Request) {
  
     return NextResponse.json({
       token,
-      role: user.role
+      role: user.roleid
     })
  
-  } catch (error) {
+  } catch (error:any) {
  
     console.error(error)
  
     return NextResponse.json(
-      { message: "Server error" },
+      { message: "error message" },
       { status: 500 }
     )
   }
