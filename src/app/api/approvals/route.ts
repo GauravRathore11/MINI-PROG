@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+﻿﻿import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function PATCH(req: Request) {
@@ -9,75 +9,104 @@ export async function PATCH(req: Request) {
 
     if (!requestId || !approvedById || !status) {
       return NextResponse.json(
-        { error: "Missing fields" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const request = await prisma.assetRequest.findUnique({
-      where: { id: requestId },
+    // 1️⃣ Verify the approver exists
+    const approver = await prisma.user.findUnique({
+      where: { id: Number(approvedById) },
+      include: { role: true },
     });
 
-    if (!request) {
+    if (!approver) {
       return NextResponse.json(
-        { error: "Request not found" },
+        { error: "Approver not found" },
         { status: 404 }
       );
     }
 
-    // create approval record
-    await prisma.approval.create({
-      data: {
-        requestId,
-        approvedById,
-        status,
+    // 2️⃣ Allow only ADMIN or AGENT to approve
+    if (
+      approver.role.name !== "ADMIN" &&
+      approver.role.name !== "AGENT"
+    ) {
+      return NextResponse.json(
+        { error: "Only ADMIN or AGENT can approve requests" },
+        { status: 403 }
+      );
+    }
+
+    // 3️⃣ Find the asset request
+    const request = await prisma.assetRequest.findUnique({
+      where: { id: Number(requestId) },
+      include: {
+        asset: true,
+        user: true,
       },
     });
 
-    let newStatus = request.status;
-
-    if (status === "REJECTED") {
-      newStatus = "REJECTED";
+    if (!request) {
+      return NextResponse.json(
+        { error: "Asset request not found" },
+        { status: 404 }
+      );
     }
 
-    if (status === "APPROVED" && request.status === "PENDING") {
-      newStatus = "MANAGER_APPROVED";
-    }
-
-    if (status === "APPROVED" && request.status === "MANAGER_APPROVED") {
-      newStatus = "ADMIN_APPROVED";
-    }
-
-    const updated = await prisma.assetRequest.update({
-      where: { id: requestId },
-      data: { status: newStatus },
+    // 4️⃣ Create approval record
+    await prisma.approval.create({
+      data: {
+        requestId: request.id,
+        approvedById: approver.id,
+        status: status,
+      },
     });
 
-    // if admin approved → allocate asset
-    if (newStatus === "ADMIN_APPROVED") {
-      await prisma.assetAllocation.create({
-        data: {
-          assetId: request.assetId,
-          userId: request.userId,
-        },
+    // 5️⃣ If rejected
+    if (status === "REJECTED") {
+      const updated = await prisma.assetRequest.update({
+        where: { id: request.id },
+        data: { status: "REJECTED" },
       });
 
-      await prisma.asset.update({
-        where: { id: request.assetId },
-        data: { status: "ALLOCATED" },
-      });
-
-      await prisma.assetRequest.update({
-        where: { id: requestId },
-        data: { status: "ALLOCATED" },
+      return NextResponse.json({
+        message: "Request rejected",
+        request: updated,
       });
     }
 
-    return NextResponse.json(updated);
+    // 6️⃣ Approve and allocate asset
+
+    const updatedRequest = await prisma.assetRequest.update({
+      where: { id: request.id },
+      data: { status: "ALLOCATED" },
+    });
+
+    // create allocation record
+    await prisma.assetAllocation.create({
+      data: {
+        assetId: request.assetId,
+        userId: request.userId,
+      },
+    });
+
+    // update asset status
+    await prisma.asset.update({
+      where: { id: request.assetId },
+      data: { status: "ALLOCATED" },
+    });
+
+    return NextResponse.json({
+      message: "Request approved and asset allocated",
+      request: updatedRequest,
+    });
+
   } catch (error) {
-    console.error(error);
+    console.error("APPROVAL ERROR:", error);
+
     return NextResponse.json(
-      { error: "Approval failed" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

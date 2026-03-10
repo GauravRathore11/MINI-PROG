@@ -1,15 +1,29 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 export default function ApprovalPage() {
   const params = useParams();
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.user) setCurrentUser(data.user);
+      });
+  }, []);
 
   const requestId = Number(params?.requestId);
 
   if (!requestId) {
     return <p>Invalid request ID</p>;
+  }
+
+  if (currentUser?.role === "USER") {
+    return <p style={{ padding: 20 }}>Unauthorized: You do not have permission to view or approve requests.</p>;
   }
 
   async function approve() {
