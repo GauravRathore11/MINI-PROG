@@ -1,15 +1,24 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function RequestsPage() {
   const [requests, setRequests] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
+    // Fetch requests
     fetch("/api/asset-requests")
       .then((res) => res.json())
       .then(setRequests);
+
+    // Fetch current user
+    fetch("/api/auth/me")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.user) setCurrentUser(data.user);
+      });
   }, []);
 
   return (
@@ -27,25 +36,27 @@ export default function RequestsPage() {
             <th>User</th>
             <th>Asset</th>
             <th>Status</th>
-            <th>Approval</th>
+            {currentUser?.role !== "USER" && <th>Approval</th>}
           </tr>
         </thead>
 
         <tbody>
-          {requests.map((r) => (
-            <tr key={r.id}>
-              <td>{r.id}</td>
-              <td>{r.user?.name}</td>
-              <td>{r.asset?.name}</td>
-              <td>{r.status}</td>
-              <td>
-                <Link href={`/approvals/${r.id}`}>
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {requests.map((r) => (
+    <tr key={r.id}>
+      <td>{r.id}</td>
+      <td>{r.user?.name}</td>
+      <td>{r.asset?.name}</td>
+      <td>{r.status}</td>
+      {currentUser?.role !== "USER" && (
+        <td>
+          <Link href={`/approvals/${r.id}`}>
+            <button>View</button>
+          </Link>
+        </td>
+      )}
+    </tr>
+  ))}
+</tbody>
       </table>
     </div>
   );

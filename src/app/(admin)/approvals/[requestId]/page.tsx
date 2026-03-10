@@ -1,15 +1,29 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 export default function ApprovalPage() {
   const params = useParams();
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
-  const requestId = Number(params.requestId);
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.user) setCurrentUser(data.user);
+      });
+  }, []);
+
+  const requestId = Number(params?.requestId);
 
   if (!requestId) {
-    return <p>Invalid Request ID</p>;
+    return <p>Invalid request ID</p>;
+  }
+
+  if (currentUser?.role === "USER") {
+    return <p style={{ padding: 20 }}>Unauthorized: You do not have permission to view or approve requests.</p>;
   }
 
   async function approve() {
@@ -41,11 +55,14 @@ export default function ApprovalPage() {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Approval Page</h1>
+    <div style={{ padding: 20 }}>
+      <h1>Asset Request Approval</h1>
       <p>Request ID: {requestId}</p>
 
-      <button onClick={approve}>Approve</button>
+      <button onClick={approve} style={{ marginRight: 10 }}>
+        Approve
+      </button>
+
       <button onClick={reject}>Reject</button>
     </div>
   );
