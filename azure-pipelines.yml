@@ -25,14 +25,22 @@ stages:
       name: 'SelfHosted'   # Use your self-hosted agent pool name
     steps:
     - task: Docker@2
-      displayName: Build and push an image to container registry
+      displayName: Build image
       inputs:
-        command: buildAndPush
+        command: build
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
+        tags: |
+          $(tag)
+          latest
+        arguments: '--build-arg DATABASE_URL=$(DATABASE_URL)'
+    
+    - task: Docker@2
+      displayName: Push image to container registry
+      inputs:
+        command: push
+        repository: $(imageRepository)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
           latest
-        buildArguments: |
-          DATABASE_URL=$(DATABASE_URL)

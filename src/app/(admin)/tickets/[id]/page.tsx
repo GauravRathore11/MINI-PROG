@@ -12,10 +12,10 @@ import type { TicketDetail, TicketStatus, Priority, Role } from "@/types/dashboa
 import { getSLAStatus, formatSLATimeLeft } from "@/lib/sla";
 
 const STATUS_COLORS: Record<TicketStatus, string> = {
-    OPEN: "bg-blue-100 text-blue-700",
-    IN_PROGRESS: "bg-yellow-100 text-yellow-700",
-    RESOLVED: "bg-green-100 text-green-700",
-    CLOSED: "bg-slate-100 text-slate-500",
+    open: "bg-blue-100 text-blue-700",
+    in_progress: "bg-yellow-100 text-yellow-700",
+    resolved: "bg-green-100 text-green-700",
+    closed: "bg-slate-100 text-slate-500",
 };
 const PRIORITY_COLORS: Record<Priority, string> = {
     CRITICAL: "bg-red-100 text-red-700",
