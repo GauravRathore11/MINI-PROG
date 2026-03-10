@@ -141,6 +141,7 @@ export async function getRecentTickets(limit = 10) {
     reporter: t.createdBy.name,
     createdAt: t.createdAt,
     updatedAt: t.updatedAt,
+    tags: [],
   }));
 }
 
@@ -170,6 +171,7 @@ export async function getRecentApprovals(limit = 6) {
     status: mapRequestStatus(r.status),
     type: "Asset Request",
     createdAt: r.createdAt,
+    dueDate: new Date(r.createdAt.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from creation
   }));
 }
 
@@ -298,10 +300,10 @@ export async function getTicketStatusBreakdown() {
   ]);
 
   return [
-    { label: "Open", value: open, color: "#f59e0b" },
-    { label: "In Progress", value: inProgress, color: "#3b82f6" },
-    { label: "Resolved", value: resolved, color: "#10b981" },
-    { label: "Closed", value: closed, color: "#6b7280" },
+    { label: "Open", value: open, color: "#000000" },          // Black
+    { label: "In Progress", value: inProgress, color: "#4B5563" }, // Gray 600
+    { label: "Resolved", value: resolved, color: "#9CA3AF" },      // Gray 400
+    { label: "Closed", value: closed, color: "#E5E7EB" },          // Gray 200
   ];
 }
 
@@ -312,15 +314,15 @@ export async function getTicketPriorityBreakdown() {
   });
 
   const colorMap: Record<string, string> = {
-    critical: "#ef4444",
-    high: "#f97316",
-    medium: "#eab308",
-    low: "#22c55e",
+    critical: "#000000",   // Black
+    high: "#374151",       // Gray 700
+    medium: "#9CA3AF",     // Gray 400
+    low: "#E5E7EB",        // Gray 200
   };
 
   return tickets.map((t) => ({
     label: t.priority.charAt(0).toUpperCase() + t.priority.slice(1).toLowerCase(),
     value: t._count.priority,
-    color: colorMap[t.priority.toLowerCase()] ?? "#94a3b8",
+    color: colorMap[t.priority.toLowerCase()] ?? "#E5E7EB",
   }));
 }
