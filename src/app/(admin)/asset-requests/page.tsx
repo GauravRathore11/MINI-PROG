@@ -32,20 +32,20 @@ export default function RequestsPage() {
         </thead>
 
         <tbody>
-          {requests.map((r) => (
-            <tr key={r.id}>
-              <td>{r.id}</td>
-              <td>{r.user?.name}</td>
-              <td>{r.asset?.name}</td>
-              <td>{r.status}</td>
-              <td>
-                <Link href={`/approvals/${r.id}`}>
-                  <button>View</button>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {requests.map((r) => (
+    <tr key={r.id}>
+      <td>{r.id}</td>
+      <td>{r.user?.name}</td>
+      <td>{r.asset?.name}</td>
+      <td>{r.status}</td>
+      <td>
+        <Link href={`/approvals/${r.id}`}>
+          <button>View</button>
+        </Link>
+      </td>
+    </tr>
+  ))}
+</tbody>
       </table>
     </div>
   );
