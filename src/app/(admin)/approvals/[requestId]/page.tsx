@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { IdBadge } from "@/components/IdBadge";
 
 export default function ApprovalPage() {
   const params = useParams();
@@ -95,7 +96,12 @@ export default function ApprovalPage() {
                </svg>
                Back to Requests
            </button>
-           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Review Asset Request</h1>
+           <div className="flex items-center gap-3">
+             <IdBadge id={requestData.id} />
+             <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+               Review Asset Request
+             </h1>
+           </div>
            <p className="text-sm text-gray-500 mt-1">Approve or reject this request for a new asset allocation.</p>
         </div>
         

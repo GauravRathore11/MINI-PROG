@@ -11,6 +11,7 @@ import Link from "next/link";
 import type { TicketDetail, TicketStatus, Priority, Role } from "@/types/dashboard";
 import { getSLAStatus, formatSLATimeLeft } from "@/lib/sla";
 import { DeleteTicketButton } from "@/components/dashboard/DeleteTicketButton";
+import { IdBadge } from "@/components/IdBadge";
 
 const STATUS_COLORS: Record<TicketStatus, string> = {
     OPEN: "bg-white border border-gray-200 text-gray-900",
@@ -187,7 +188,12 @@ export default function TicketDetailPage() {
                     <div className="card p-6">
                         <div className="flex items-start justify-between gap-4 mb-5 border-b border-gray-100 pb-5">
                             <div className="flex-1">
-                                <h1 className="text-xl font-semibold tracking-tight text-gray-900">{ticket.title}</h1>
+                                <div className="flex items-center gap-3">
+                                    <IdBadge id={ticket.id} />
+                                    <h1 className="text-xl font-semibold tracking-tight text-gray-900">
+                                        {ticket.title}
+                                    </h1>
+                                </div>
                                 <div className="flex items-center gap-2 mt-3 flex-wrap">
                                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[normalizeStatus(ticket.status)]}`}>
                                         {ticket.status.replace("_", " ")}

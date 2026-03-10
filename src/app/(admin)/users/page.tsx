@@ -1,10 +1,9 @@
-import React from "react";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
 
-export default async function UsersPage() {
   const users = await prisma.user.findMany({
+    where: whereClause,
     include: { role: true },
     orderBy: { createdAt: "desc" },
   });
@@ -32,6 +31,7 @@ export default async function UsersPage() {
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-gray-50/50 text-gray-500 border-b border-gray-100">
               <tr>
+                <th className="px-6 py-4 font-medium">ID</th>
                 <th className="px-6 py-4 font-medium">Name</th>
                 <th className="px-6 py-4 font-medium">Email</th>
                 <th className="px-6 py-4 font-medium">Role</th>
@@ -41,6 +41,9 @@ export default async function UsersPage() {
             <tbody className="divide-y divide-gray-100 text-black">
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-6 py-4">
+                     <IdBadge id={u.id} />
+                  </td>
                   <td className="px-6 py-4 font-medium">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
