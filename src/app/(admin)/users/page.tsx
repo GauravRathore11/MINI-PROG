@@ -1,6 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
+import Link from "next/link";
 
 export default async function UsersPage() {
   const users = await prisma.user.findMany({
@@ -10,9 +11,20 @@ export default async function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-black">Users</h1>
-        <p className="text-sm text-gray-500">Manage individuals and their roles in your workspace.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight text-black">Users</h1>
+          <p className="text-sm text-gray-500">Manage individuals and their roles in your workspace.</p>
+        </div>
+        <Link
+          href="/users/create"
+          className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black w-max"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add User
+        </Link>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
