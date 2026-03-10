@@ -35,15 +35,18 @@ export async function createNotification({
 }: CreateNotificationOptions): Promise<void> {
     // Normalize numeric fields to numbers when possible
     const userIdNum = typeof userId === "number" ? userId : parseInt(userId, 10);
-    const ticketIdNum = ticketId === undefined || ticketId === null ? null : (typeof ticketId === "number" ? ticketId : parseInt(String(ticketId), 10));
-    const assetRequestIdNum = assetRequestId === undefined || assetRequestId === null ? null : (typeof assetRequestId === "number" ? assetRequestId : parseInt(String(assetRequestId), 10));
+
+    // We do not store ticketId/assetRequestId on Notification in the schema.
+    // If callers pass them, include them in the message text for traceability.
+    const augmentedMessage = ticketId || assetRequestId
+        ? `${message}${ticketId ? ` (ticket: ${ticketId})` : ""}${assetRequestId ? ` (request: ${assetRequestId})` : ""}`
+        : message;
 
     await prisma.notification.create({
         data: {
             userId: userIdNum,
-            message,
-            ticketId: ticketIdNum,
-            assetRequestId: assetRequestIdNum,
+
+            message: augmentedMessage,
         },
     });
 }
