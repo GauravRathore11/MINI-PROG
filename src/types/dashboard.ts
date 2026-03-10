@@ -1,7 +1,24 @@
 // ─── Dashboard Types ────────────────────────────────────────────────────────
 
-export type TicketStatus = "open" | "in_progress" | "resolved" | "closed";
-export type Priority = "low" | "medium" | "high" | "critical";
+// Support both Prisma-lowercase and UI-uppercase variants for backward compatibility
+export type TicketStatus =
+  | "open"
+  | "OPEN"
+  | "in_progress"
+  | "IN_PROGRESS"
+  | "resolved"
+  | "RESOLVED"
+  | "closed"
+  | "CLOSED";
+export type Priority =
+  | "low"
+  | "LOW"
+  | "medium"
+  | "MEDIUM"
+  | "high"
+  | "HIGH"
+  | "critical"
+  | "CRITICAL";
 export type TicketPriority = "low" | "medium" | "high" | "critical";
 export type ApprovalStatus = "pending" | "approved" | "rejected" | "escalated";
 export type Role = "USER" | "EMPLOYEE" | "AGENT" | "ADMIN" | "MANAGER";
