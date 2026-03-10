@@ -1,6 +1,7 @@
 import type { Priority } from "@/types/dashboard";
 
 // SLA response times in hours (kept local so this module is self-contained).
+
 // Use explicit lowercase keys (these match the Prisma values). We normalize
 // incoming `Priority` values (which may be uppercase in some UI code) to
 // lowercase before lookup.
@@ -12,8 +13,10 @@ const SLA_HOURS: Record<"critical" | "high" | "medium" | "low", number> = {
 };
 export type SLAStatus = "on_track" | "at_risk" | "breached" | "resolved";
 export function calculateSLADeadline(priority: Priority): Date {
+
     const key = String(priority).toLowerCase() as keyof typeof SLA_HOURS;
     const hours = SLA_HOURS[key] ?? 24;
+
     const deadline = new Date();
     deadline.setHours(deadline.getHours() + hours);
     return deadline;

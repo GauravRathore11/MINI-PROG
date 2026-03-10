@@ -35,6 +35,7 @@ export async function createNotification({
 }: CreateNotificationOptions): Promise<void> {
     // Normalize numeric fields to numbers when possible
     const userIdNum = typeof userId === "number" ? userId : parseInt(userId, 10);
+
     // We do not store ticketId/assetRequestId on Notification in the schema.
     // If callers pass them, include them in the message text for traceability.
     const augmentedMessage = ticketId || assetRequestId
@@ -44,6 +45,7 @@ export async function createNotification({
     await prisma.notification.create({
         data: {
             userId: userIdNum,
+
             message: augmentedMessage,
         },
     });

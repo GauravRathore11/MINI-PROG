@@ -1,5 +1,6 @@
 // Module shims for third-party libs without types in this project
 declare module "lucide-react" {
+
   // Provide permissive named exports for the icons this project imports.
   export const Ticket: any;
   export const CheckSquare: any;
@@ -32,4 +33,5 @@ declare module "date-fns" {
   export function isPast(...args: any[]): any;
   const _default: any;
   export default _default;
+
 }
