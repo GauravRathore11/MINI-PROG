@@ -3,10 +3,10 @@ import type { Priority } from "@/types/dashboard";
 // SLA response times in hours (kept local so this module is self-contained).
 // Matches the values used in the tickets API and rendered bundle.
 const SLA_HOURS: Record<Priority, number> = {
-    CRITICAL: 4,
-    HIGH: 8,
-    MEDIUM: 24,
-    LOW: 72,
+    critical: 4,
+    high: 8,
+    medium: 24,
+    low: 72,
 };
 export type SLAStatus = "on_track" | "at_risk" | "breached" | "resolved";
 export function calculateSLADeadline(priority: Priority): Date {
