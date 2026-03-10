@@ -36,7 +36,7 @@ export default function RequestsPage() {
             <th>User</th>
             <th>Asset</th>
             <th>Status</th>
-            {currentUser?.role !== "USER" && <th>Approval</th>}
+            {["ADMIN", "MANAGER", "AGENT"].includes(currentUser?.role) && <th>Approval</th>}
           </tr>
         </thead>
 
@@ -47,7 +47,7 @@ export default function RequestsPage() {
       <td>{r.user?.name}</td>
       <td>{r.asset?.name}</td>
       <td>{r.status}</td>
-      {currentUser?.role !== "USER" && (
+      {["ADMIN", "MANAGER", "AGENT"].includes(currentUser?.role) && (
         <td>
           <Link href={`/approvals/${r.id}`}>
             <button>View</button>

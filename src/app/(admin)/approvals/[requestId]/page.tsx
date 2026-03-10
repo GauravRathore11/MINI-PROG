@@ -22,7 +22,7 @@ export default function ApprovalPage() {
     return <p>Invalid request ID</p>;
   }
 
-  if (currentUser?.role === "USER") {
+  if (!["ADMIN", "MANAGER", "AGENT"].includes(currentUser?.role)) {
     return <p style={{ padding: 20 }}>Unauthorized: You do not have permission to view or approve requests.</p>;
   }
 
