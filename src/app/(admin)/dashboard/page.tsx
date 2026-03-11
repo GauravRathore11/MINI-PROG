@@ -90,8 +90,8 @@ export default async function DashboardPage() {
             iconBg="bg-gray-100"
             iconColor="text-black"
           />
-          {/* <StatCard
-            title="Avg SLA (hrs)"
+           <StatCard
+            title="New SLA Updates (hrs)"
             value={`${stats.avgResolutionTime}h`}
             subtitle="avg SLA across resolved tickets"
             icon={Clock}
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
             iconBg="bg-gray-100"
             iconColor="text-black"
           />
-        </div>*/}
+        </div>
  
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           <div className="lg:col-span-2">
